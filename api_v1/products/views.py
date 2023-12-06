@@ -5,8 +5,7 @@ from core.models import db_helper
 
 from . import crud
 from .dependencies import product_by_id
-from .schemas import (Product, ProductCreate, ProductUpdate,
-                      ProductUpdatePartial)
+from .schemas import Product, ProductCreate, ProductUpdate, ProductUpdatePartial
 
 router = APIRouter(tags=["Products"])
 

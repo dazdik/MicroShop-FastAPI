@@ -12,7 +12,6 @@ from users.views import router as users_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-       
     yield
 
 
