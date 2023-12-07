@@ -12,7 +12,7 @@ class UserRelationMixin:
     _user_back_populates: str | None = None
 
     @declared_attr
-    def user(cls) -> Mapped[int]:
+    def user_id(cls) -> Mapped[int]:
         return mapped_column(
             ForeignKey("users.id"),
             unique=cls._user_id_unique,
