@@ -5,7 +5,6 @@ from fastapi import FastAPI
 
 from api_v1 import router as router_v1
 from core.config import settings
-
 from items_views import router as items_router
 from users.views import router as users_router
 

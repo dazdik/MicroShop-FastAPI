@@ -1,11 +1,7 @@
 from asyncio import current_task
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_scoped_session,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
+                                    async_sessionmaker, create_async_engine)
 
 from core.config import settings
 
@@ -36,4 +32,4 @@ class DataBaseHelper:
         await session.close()
 
 
-db_helper = DataBaseHelper(url=settings.db_url, echo=settings.db_echo)
+db_helper = DataBaseHelper(url=settings.db.url, echo=settings.db.echo)
