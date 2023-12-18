@@ -1,6 +1,10 @@
 import secrets
+import uuid
+from time import time
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import (APIRouter, Cookie, Depends, Header, HTTPException,
+                     Response, status)
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 router = APIRouter(prefix="/demo_auth", tags=["Demo Auth"])
@@ -53,9 +57,7 @@ def get_auth_user(credentials: HTTPBasicCredentials = Depends(security)) -> str:
 
 @router.get("/basic-auth-username/")
 async def basic_auth_credentials(username: str = Depends(get_auth_user)):
-    return {"message": f"Hi, {username}", "username": username} @ router.get(
-        "/basic-auth-username/"
-    )
+    return {"message": f"Hi, {username}", "username": username}
 
 
 @router.get("/some_http_headers_auth/")
@@ -65,3 +67,50 @@ async def some_http_headers_auth(
     return {"message": f"Hi, {username}", "username": username}
 
 
+COOKIES: dict[str, dict[str, Any]] = {}
+COOKIES_SESSION_ID_KEY = "web-app-session-id"
+
+
+def get_session_data(session_id: str = Cookie(alias=COOKIES_SESSION_ID_KEY)) -> dict:
+    if session_id not in COOKIES:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="not authenticated",
+        )
+    return COOKIES[session_id]
+
+
+def generate_session_id() -> str:
+    return uuid.uuid4().hex
+
+
+@router.post("/login-cookie/")
+async def demo_login_cookie(
+    response: Response,
+    username: str = Depends(get_username_by_static_auth_token),
+):
+    session_id = generate_session_id()
+    COOKIES[session_id] = {
+        "username": username,
+        "login_at": int(time()),
+    }
+    response.set_cookie(COOKIES_SESSION_ID_KEY, session_id)
+    return {"message": "everything ok"}
+
+
+@router.get("/check-cookie/")
+async def demo_auth_check_cookie(user_session_data: dict = Depends(get_session_data)):
+    username = user_session_data["username"]
+    return {"username": username, **user_session_data}
+
+
+@router.get("/logout-cookie/")
+async def demo_auth_check_cookie(
+    response: Response,
+    session_id: str = Cookie(alias=COOKIES_SESSION_ID_KEY),
+    user_session_data: dict = Depends(get_session_data),
+):
+    COOKIES.pop(session_id)
+    response.delete_cookie(COOKIES_SESSION_ID_KEY)
+    username = user_session_data["username"]
+    return {"message": f"Bye, {username}"}
