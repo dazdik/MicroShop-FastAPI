@@ -12,9 +12,17 @@ class DbSettings(BaseModel):
     echo: bool = True
 
 
+class AuthJWT(BaseModel):
+    private_key_path: Path = BASE_DIR / "cert" / "jwt-private.pem"
+    public_key_path: Path = BASE_DIR / "cert" / "jwt-public.pem"
+    algorithm: str = "RS256"
+    token_expire_minutes: int = 3
+
+
 class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     db: DbSettings = DbSettings()
+    auth_jwt: AuthJWT = AuthJWT()
 
 
 settings = Settings()
